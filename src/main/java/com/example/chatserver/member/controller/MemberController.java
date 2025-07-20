@@ -28,6 +28,7 @@ public class MemberController {
     public ResponseEntity<?> doLogin(@RequestBody MemberLoginReqDto memberLoginReqDto){
         //email ,
         Member member = memberService.login(memberLoginReqDto);
-        //
+
+        return null;
     }
 }
