@@ -13,3 +13,8 @@ spring :
      hibernate :
        ddl-auto : update
      show_sql : true
+
+jwt :
+#  chatserversecretaccesstoken
+  secretKey : Y2hhdHNlcnZlcnNlY3JldGFjY2Vzc3Rva2Vu
+  expiration : 3000
