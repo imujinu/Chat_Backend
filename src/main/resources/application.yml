@@ -3,7 +3,7 @@
 spring :
    datasource :
      driver-class-name: com.mysql.cj.jdbc.Driver
-     url : jdbc:mysql://localhost:3306/chatdb?useSSL=false
+     url : jdbc:mysql://localhost:3306/chat?useSSL=false
      username : root
      password : 1234
    jpa :
@@ -11,7 +11,7 @@ spring :
      database-platform : org.hibernate.dialect.MySQLDialect
      generate-ddl : true
      hibernate :
-       ddl-auto : update
+       ddl-auto : create
      show_sql : true
 
 jwt :
