@@ -23,13 +23,15 @@ public class SecurityConfigs {
     private final JwtAuthFilter jwtAuthFilter;
     @Bean
     public SecurityFilterChain myFilter(HttpSecurity httpSecurity) throws Exception{
-        return httpSecurity.cors(cors->cors.configurationSource(configurationSource()))
+        return httpSecurity
+                .cors(cors->cors.configurationSource(configurationSource()))
                 .csrf(AbstractHttpConfigurer::disable) // csrf 비활성화
                 .httpBasic(AbstractHttpConfigurer::disable) //Http basic 비할성화
                 //특정 url 패턴에 대해서는 Authentication 객체 요구하지 않음 (인증 처리 제외)
                 .authorizeHttpRequests(a->a.requestMatchers("/member/create", "/member/doLogin").permitAll().anyRequest().authenticated())
                 .sessionManagement(s->s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))// 세션 방식을 사용하지 않겠다.
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                // 특정 유저에 대해 authenticate 객체를 만들어주겠다.
                 .build();
     }
 
@@ -39,6 +41,7 @@ public class SecurityConfigs {
         corsConfiguration.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
         corsConfiguration.setAllowedMethods(Arrays.asList("*")); // 모든 http 요청허락
         corsConfiguration.setAllowedHeaders(Arrays.asList("*")); // 모든 header값 허용
+        // 클라이언트가 헤더에 쿠키를 담아 보낼 수 있게 해준다.
         corsConfiguration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
