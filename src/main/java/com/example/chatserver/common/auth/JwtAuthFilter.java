@@ -1,4 +1,4 @@
-package com.example.chatserver.member.common.auth;
+package com.example.chatserver.common.auth;
 
 import com.example.chatserver.member.domain.Member;
 import io.jsonwebtoken.Claims;

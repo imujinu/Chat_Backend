@@ -1,6 +1,6 @@
-package com.example.chatserver.member.common.configs;
+package com.example.chatserver.common.configs;
 
-import com.example.chatserver.member.common.auth.JwtAuthFilter;
+import com.example.chatserver.common.auth.JwtAuthFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,7 +28,7 @@ public class SecurityConfigs {
                 .csrf(AbstractHttpConfigurer::disable) // csrf 비활성화
                 .httpBasic(AbstractHttpConfigurer::disable) //Http basic 비할성화
                 //특정 url 패턴에 대해서는 Authentication 객체 요구하지 않음 (인증 처리 제외)
-                .authorizeHttpRequests(a->a.requestMatchers("/member/create", "/member/doLogin").permitAll().anyRequest().authenticated())
+                .authorizeHttpRequests(a->a.requestMatchers("/member/create", "/member/doLogin", "/connect").permitAll().anyRequest().authenticated())
                 .sessionManagement(s->s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))// 세션 방식을 사용하지 않겠다.
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 // 특정 유저에 대해 authenticate 객체를 만들어주겠다.

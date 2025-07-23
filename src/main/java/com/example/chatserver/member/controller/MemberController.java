@@ -1,6 +1,6 @@
 package com.example.chatserver.member.controller;
 
-import com.example.chatserver.member.common.auth.JwtTokenProvider;
+import com.example.chatserver.common.auth.JwtTokenProvider;
 import com.example.chatserver.member.domain.Member;
 import com.example.chatserver.member.dto.MemberListResDto;
 import com.example.chatserver.member.dto.MemberLoginReqDto;
@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 @RestController
 @RequestMapping("/member")
