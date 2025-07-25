@@ -1,6 +1,7 @@
 package com.example.chatserver.member.controller;
 
 import com.example.chatserver.member.dto.ChatMeesageReqDto;
+import com.example.chatserver.member.service.ChatService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -11,7 +12,7 @@ import org.springframework.stereotype.Controller;
 @Controller
 @RequiredArgsConstructor
 public class stompController {
-
+    private final ChatService chatService;
     private final SimpMessageSendingOperations messageTemplates;
     // 방법 1. MessageMapping(수신) 과 SenTo ( topic에 메시지전달) 한꺼번에 처리
 //    @MessageMapping("/{roomId}") // 클라이언트에서 특정 pulblish/roomId로 메시지 발행시 이 경로로 매핑된다.
@@ -25,6 +26,9 @@ public class stompController {
     @MessageMapping("/{roomId}")
     public void sendMessage(@DestinationVariable Long roomId, ChatMeesageReqDto dto){
         System.out.println("roomid+::" + roomId+ dto.getMessage());
+        chatService.saveMessage(roomId, dto);
         messageTemplates.convertAndSend("/topic/"+roomId, dto);
     }
+
+
 }

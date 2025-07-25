@@ -1,9 +1,19 @@
 package com.example.chatserver.member.service;
 
+import com.example.chatserver.member.domain.*;
+import com.example.chatserver.member.dto.ChatMeesageReqDto;
+import com.example.chatserver.member.dto.ChatRoomListResDto;
 import com.example.chatserver.member.repository.*;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -16,4 +26,83 @@ public class ChatService {
     private final MemberRepository memberRepository;
 
 
+    public void saveMessage(Long roomId, ChatMeesageReqDto dto) {
+        // 채팅방 조회
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(()->new EntityNotFoundException("채팅방이 존재하지 않습니다."));
+
+        // 보낸 사람 조회
+        Member member = memberRepository.findByEmail(dto.getSenderEmail()).orElseThrow();
+
+        // 메시지 저장
+        ChatMessage chatMessage = ChatMessage.builder()
+                .chatRoom(chatRoom)
+                .content(dto.getMessage())
+                .member(member)
+                .build();
+                chatMessageRepository.save(chatMessage);
+
+                // 사용자 별로 읽음 여부 저장
+
+        List<ChatParticipant> participantList = chatParticipantRepository.findByChatRoom(chatRoom);
+        for(ChatParticipant p : participantList){
+            ReadStatus readStatus = ReadStatus.builder()
+                    .chatMessage(chatMessage)
+                    .chatRoom(chatRoom)
+                    .member(member)
+                    .isRead(p.getMember().equals(member))
+                    .build();
+
+            readStatusRepository.save(readStatus);
+        }
+
+    }
+
+    public void createGroupRoom(String roomName) {
+
+        // 방 생성자는 곧장 채팅방에 참가해야 한다.
+        Member member = memberRepository.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName()).orElseThrow(()->new NoSuchElementException());
+        // 채팅방을 만들어준다.
+
+        ChatRoom chatRoom = ChatRoom.builder()
+                .name(roomName)
+                .isGroupChat("Y")
+                .build();
+
+        ChatParticipant chatParticipant = ChatParticipant.builder()
+                .chatRoom(chatRoom)
+                .member(member)
+                .build();
+        chatRoom.getParticipantList().add(chatParticipant);
+
+        chatRoomRepository.save(chatRoom);
+
+
+    }
+
+    public List<ChatRoomListResDto> getGroupchatRooms() {
+        return chatRoomRepository.findByIsGroupChat("Y").stream().map(a-> new ChatRoomListResDto().fromEntity(a)).collect(Collectors.toList());
+    }
+
+    public void addParticipantToGroupChat(Long roomId) {
+        // 채팅방 조회
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(()->new EntityNotFoundException(""));
+        // 멤버 조회
+        Member member = memberRepository.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName()).orElseThrow(()->new EntityNotFoundException(""));
+        // 이미 참여자인지 검증
+        Optional<ChatParticipant> participant = chatParticipantRepository.findByChatRoomAndMember(chatRoom,member);
+
+        // ChatParticipant 객체 생성 후 저장
+
+        if(!participant.isPresent()){
+
+
+        ChatParticipant chatParticipant = ChatParticipant.builder()
+                .chatRoom(chatRoom)
+                .member(member)
+                .build();
+
+        chatParticipantRepository.save(chatParticipant);
+
+        }
+    }
 }

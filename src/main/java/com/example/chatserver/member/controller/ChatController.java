@@ -1,11 +1,14 @@
 package com.example.chatserver.member.controller;
 
+import com.example.chatserver.member.dto.ChatRoomListResDto;
 import com.example.chatserver.member.service.ChatService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/chat")
@@ -13,4 +16,21 @@ import org.springframework.web.bind.annotation.RestController;
 public class ChatController {
     private final ChatService chatService;
 
+    @PostMapping("/room/group/create")
+    public ResponseEntity<?> createGroupRoom(@RequestParam String roomName){
+        chatService.createGroupRoom(roomName);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/room/group/list")
+    public ResponseEntity<?> getGroupChatRooms(){
+        List<ChatRoomListResDto> chatRooms = chatService.getGroupchatRooms();
+        return new ResponseEntity<>(chatRooms, HttpStatus.OK);
+    }
+
+    @PostMapping("/room/group/{roomId}/join")
+    public ResponseEntity<?> joinGroupChatRoom(@PathVariable Long roomId){
+        chatService.addParticipantToGroupChat(roomId);
+        return ResponseEntity.ok().build();
+    }
 }
