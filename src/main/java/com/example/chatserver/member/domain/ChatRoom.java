@@ -9,20 +9,15 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @Getter
-public class Member extends BaseTimeEntity {
+public class ChatRoom extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    // name , email( nullable unique), password, role(enum)
+    @Column(nullable = false)
     private String name;
-    @Column(nullable=false, unique=true)
-    private String email;
-    private String password;
-    @Enumerated(EnumType.STRING)
     @Builder.Default
-    private Role role = Role.USER;
-}   
+    private String isGroupChat="N";
+}
