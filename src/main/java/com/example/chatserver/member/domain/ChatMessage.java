@@ -7,12 +7,15 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-public class ChatParticipant extends BaseTimeEntity {
+public class ChatMessage extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -25,5 +28,10 @@ public class ChatParticipant extends BaseTimeEntity {
     @JoinColumn(name = "member_id", nullable = false )
     private Member member;
 
+    @Column(nullable = false, length = 500)
+    private String content;
 
+    @OneToMany(mappedBy = "chatMessage", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @Builder.Default
+    private List<ReadStatus> readStatusList = new ArrayList<>();
 }

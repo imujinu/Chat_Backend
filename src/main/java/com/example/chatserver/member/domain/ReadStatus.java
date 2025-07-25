@@ -8,11 +8,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-public class ChatParticipant extends BaseTimeEntity {
+@Builder
+public class ReadStatus extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -25,5 +25,10 @@ public class ChatParticipant extends BaseTimeEntity {
     @JoinColumn(name = "member_id", nullable = false )
     private Member member;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "chat_message_id", nullable = false)
+    private ChatMessage chatMessage;
 
+    @Column(nullable = false)
+    private Boolean isRead;
 }
