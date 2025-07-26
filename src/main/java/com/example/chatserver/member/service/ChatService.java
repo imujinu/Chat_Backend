@@ -131,4 +131,12 @@ public class ChatService {
         }
         return chatMessageDtos;
      }
+
+     public boolean isRoomParticipant(String email, Long roomId){
+         ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(()->new EntityNotFoundException(""));
+         Member member = memberRepository.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName()).orElseThrow(()->new EntityNotFoundException(""));
+
+         return chatParticipantRepository.findByChatRoom(chatRoom).stream().anyMatch(p -> p.getMember().equals(member));
+
+    }
 }
