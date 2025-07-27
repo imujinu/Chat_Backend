@@ -40,9 +40,9 @@ public class ChatService {
                 .content(dto.getMessage())
                 .member(member)
                 .build();
-                chatMessageRepository.save(chatMessage);
+        chatMessageRepository.save(chatMessage);
 
-                // 사용자 별로 읽음 여부 저장
+        // 사용자 별로 읽음 여부 저장
 
         List<ChatParticipant> participantList = chatParticipantRepository.findByChatRoom(chatRoom);
         for(ChatParticipant p : participantList){
@@ -97,12 +97,12 @@ public class ChatService {
         if(!participant.isPresent()){
 
 
-        ChatParticipant chatParticipant = ChatParticipant.builder()
-                .chatRoom(chatRoom)
-                .member(member)
-                .build();
+            ChatParticipant chatParticipant = ChatParticipant.builder()
+                    .chatRoom(chatRoom)
+                    .member(member)
+                    .build();
 
-        chatParticipantRepository.save(chatParticipant);
+            chatParticipantRepository.save(chatParticipant);
 
         }
     }
@@ -130,13 +130,13 @@ public class ChatService {
             chatMessageDtos.add(chatMessageDto);
         }
         return chatMessageDtos;
-     }
+    }
 
-     public boolean isRoomParticipant(String email, Long roomId){
-         ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(()->new EntityNotFoundException(""));
-         Member member = memberRepository.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName()).orElseThrow(()->new EntityNotFoundException(""));
+    public boolean isRoomParticipant(String email, Long roomId){
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(()->new EntityNotFoundException(""));
+        Member member = memberRepository.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName()).orElseThrow(()->new EntityNotFoundException(""));
 
-         return chatParticipantRepository.findByChatRoom(chatRoom).stream().anyMatch(p -> p.getMember().equals(member));
+        return chatParticipantRepository.findByChatRoom(chatRoom).stream().anyMatch(p -> p.getMember().equals(member));
 
     }
 }
