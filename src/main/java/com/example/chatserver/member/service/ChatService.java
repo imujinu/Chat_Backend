@@ -156,11 +156,11 @@ public class ChatService {
 
     public List<MyChatListResDto> getMyChatRoom() {
         Member member = memberRepository.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName()).orElseThrow(()->new NoSuchElementException());
-        List<ChatParticipant> chatParticipants = chatParticipantRepository.findByMember(member);
+        List<ChatParticipant> chatParticipants = chatParticipantRepository.findAllByMember(member);
         List<MyChatListResDto> dtos = new ArrayList<>();
         for(ChatParticipant c : chatParticipants){
             ChatRoom chatRoom = c.getChatRoom();
-            Long count = readStatusRepository.findByChatRoomAndMemberAndIsRead(member,chatRoom,"N");
+            Long count = readStatusRepository.findByChatRoomAndMemberAndIsReadFalse(member,chatRoom);
             MyChatListResDto resDto = MyChatListResDto.builder()
                     .roomId(chatRoom.getId())
                     .roomName(chatRoom.getName())
@@ -172,4 +172,29 @@ public class ChatService {
         return dtos;
     }
 
+    public void leaveGroupChatRoom(Long roomId) {
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(()->new EntityNotFoundException(""));
+        Member member = memberRepository.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName()).orElseThrow(()->new NoSuchElementException());
+
+        if(chatRoom.getIsGroupChat().equals("N")){
+            throw new IllegalArgumentException("단채채팅방이 아닙니다.");
+        }
+
+        ChatParticipant c = chatParticipantRepository.findByChatRoomAndMember(chatRoom,member).orElseThrow(()->new EntityNotFoundException("참여자를 찾을 수 없습니다."));
+        chatParticipantRepository.delete(c);
+
+        List<ChatParticipant> chatParticipants = chatParticipantRepository.findByChatRoom(chatRoom);
+
+        if(chatParticipants.isEmpty()){
+            chatRoomRepository.delete(chatRoom);
+        }
+
+    }
+
+    public Long getOrCreatePrivateRoom(Long otherMemberId) {
+
+        Member member = memberRepository.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName()).orElseThrow(()->new NoSuchElementException());
+        Member otherMember = memberRepository.findById(otherMemberId).orElseThrow(()->new EntityNotFoundException());
+        member.deleteMember("Y");
+    }
 }

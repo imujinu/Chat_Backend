@@ -10,5 +10,6 @@ import java.util.List;
 public interface ReadStatusRepository extends JpaRepository<ReadStatus, Long> {
     List<ReadStatus> findByChatRoomAndMember(ChatRoom chatRoom, Member member);
 
-    Long findByChatRoomAndMemberAndIsRead(Member member, ChatRoom chatRoom, String n);
+
+    Long findByChatRoomAndMemberAndIsReadFalse(Member member, ChatRoom chatRoom);
 }
