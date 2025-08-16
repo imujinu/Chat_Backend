@@ -3,6 +3,7 @@ package com.example.chatserver.member.service;
 import com.example.chatserver.member.domain.*;
 import com.example.chatserver.member.dto.ChatMessageDto;
 import com.example.chatserver.member.dto.ChatRoomListResDto;
+import com.example.chatserver.member.dto.MyChatListResDto;
 import com.example.chatserver.member.repository.*;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -40,9 +41,9 @@ public class ChatService {
                 .content(dto.getMessage())
                 .member(member)
                 .build();
-        chatMessageRepository.save(chatMessage);
+                chatMessageRepository.save(chatMessage);
 
-        // 사용자 별로 읽음 여부 저장
+                // 사용자 별로 읽음 여부 저장
 
         List<ChatParticipant> participantList = chatParticipantRepository.findByChatRoom(chatRoom);
         for(ChatParticipant p : participantList){
@@ -97,15 +98,16 @@ public class ChatService {
         if(!participant.isPresent()){
 
 
-            ChatParticipant chatParticipant = ChatParticipant.builder()
-                    .chatRoom(chatRoom)
-                    .member(member)
-                    .build();
+        ChatParticipant chatParticipant = ChatParticipant.builder()
+                .chatRoom(chatRoom)
+                .member(member)
+                .build();
 
-            chatParticipantRepository.save(chatParticipant);
+        chatParticipantRepository.save(chatParticipant);
 
         }
     }
+
 
     public List<ChatMessageDto> getChatHistory(Long roomId) {
         // 내가 해당 채팅방의 참여자가 아닐 경우 에러
@@ -138,5 +140,61 @@ public class ChatService {
 
         return chatParticipantRepository.findByChatRoom(chatRoom).stream().anyMatch(p -> p.getMember().equals(member));
 
+    }
+
+    public void messageRead(Long roomId) {
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(()->new EntityNotFoundException(""));
+        Member member = memberRepository.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName()).orElseThrow(()->new EntityNotFoundException(""));
+        List<ReadStatus> readStatuses = readStatusRepository.findByChatRoomAndMember(chatRoom,member);
+
+        for(ReadStatus r : readStatuses){
+            r.updateIsRead(true);
+        }
+
+
+    }
+
+    public List<MyChatListResDto> getMyChatRoom() {
+        Member member = memberRepository.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName()).orElseThrow(()->new NoSuchElementException());
+        List<ChatParticipant> chatParticipants = chatParticipantRepository.findAllByMember(member);
+        List<MyChatListResDto> dtos = new ArrayList<>();
+        for(ChatParticipant c : chatParticipants){
+            ChatRoom chatRoom = c.getChatRoom();
+            Long count = readStatusRepository.findByChatRoomAndMemberAndIsReadFalse(member,chatRoom);
+            MyChatListResDto resDto = MyChatListResDto.builder()
+                    .roomId(chatRoom.getId())
+                    .roomName(chatRoom.getName())
+                    .isGroupChat(chatRoom.getIsGroupChat())
+                    .ueReadCount(count)
+                    .build();
+            dtos.add(resDto);
+        }
+        return dtos;
+    }
+
+    public void leaveGroupChatRoom(Long roomId) {
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(()->new EntityNotFoundException(""));
+        Member member = memberRepository.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName()).orElseThrow(()->new NoSuchElementException());
+
+        if(chatRoom.getIsGroupChat().equals("N")){
+            throw new IllegalArgumentException("단채채팅방이 아닙니다.");
+        }
+
+        ChatParticipant c = chatParticipantRepository.findByChatRoomAndMember(chatRoom,member).orElseThrow(()->new EntityNotFoundException("참여자를 찾을 수 없습니다."));
+        chatParticipantRepository.delete(c);
+
+        List<ChatParticipant> chatParticipants = chatParticipantRepository.findByChatRoom(chatRoom);
+
+        if(chatParticipants.isEmpty()){
+            chatRoomRepository.delete(chatRoom);
+        }
+
+    }
+
+    public Long getOrCreatePrivateRoom(Long otherMemberId) {
+
+        Member member = memberRepository.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName()).orElseThrow(()->new NoSuchElementException());
+        Member otherMember = memberRepository.findById(otherMemberId).orElseThrow(()->new EntityNotFoundException());
+        member.deleteMember("Y");
     }
 }
