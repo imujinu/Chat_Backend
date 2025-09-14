@@ -195,6 +195,6 @@ public class ChatService {
 
         Member member = memberRepository.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName()).orElseThrow(()->new NoSuchElementException());
         Member otherMember = memberRepository.findById(otherMemberId).orElseThrow(()->new EntityNotFoundException());
-        member.deleteMember("Y");
+        return null;
     }
 }
