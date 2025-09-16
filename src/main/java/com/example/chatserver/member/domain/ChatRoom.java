@@ -24,8 +24,6 @@ public class ChatRoom extends BaseTimeEntity {
     @Builder.Default
     private String isGroupChat="N";
 
-    //하나의 채팅방에는 다수의 참여자
-    // 다수의 메세지가 있음
     //근데 채팅방이 사라지면 모두 삭제되어야 하므로 연결해놓음
     @OneToMany(mappedBy = "chatRoom", cascade = CascadeType.REMOVE, orphanRemoval = true)
     @Builder.Default
